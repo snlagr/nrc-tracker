@@ -232,7 +232,9 @@
                 <label>Filter by status</label>
                 <div class="toggle-buttons">
                     <button class="toggle-btn" id="filterCompleted">Completed</button>
+                    <button class="toggle-btn" id="filterNotCompleted">Not Completed</button>
                     <button class="toggle-btn" id="filterSaved">Saved</button>
+                    <button class="toggle-btn" id="filterNotSaved">Not Saved</button>
                 </div>
             </div>
         </div>
@@ -253,7 +255,9 @@
         let completedRuns = new Set(JSON.parse(localStorage.getItem('completedRuns') || '[]'));
         let savedRuns = new Set(JSON.parse(localStorage.getItem('savedRuns') || '[]'));
         let filterCompletedActive = false;
+        let filterNotCompletedActive = false;
         let filterSavedActive = false;
+        let filterNotSavedActive = false;
 
         async function loadRuns() {
             try {
@@ -314,8 +318,6 @@
             let filtered = allRuns.filter(run => {
                 const title = run.landing?.title?.toLowerCase() || '';
                 const matchesSearch = title.includes(search);
-                const matchesCompleted = !filterCompletedActive || completedRuns.has(run.id);
-                const matchesSaved = !filterSavedActive || savedRuns.has(run.id);
 
                 // Hide distance-based runs if sorting by time
                 if (sortBy.includes('time')) {
@@ -329,7 +331,33 @@
                     if (distance === 0) return false;
                 }
 
-                return matchesSearch && matchesCompleted && matchesSaved;
+                // Check if any status filter is active
+                const anyFilterActive = filterCompletedActive || filterNotCompletedActive ||
+                                       filterSavedActive || filterNotSavedActive;
+
+                if (!anyFilterActive) {
+                    return matchesSearch;
+                }
+
+                // OR logic: if any filter matches, include the run
+                const statusMatches = [];
+
+                if (filterCompletedActive) {
+                    statusMatches.push(completedRuns.has(run.id));
+                }
+                if (filterNotCompletedActive) {
+                    statusMatches.push(!completedRuns.has(run.id));
+                }
+                if (filterSavedActive) {
+                    statusMatches.push(savedRuns.has(run.id));
+                }
+                if (filterNotSavedActive) {
+                    statusMatches.push(!savedRuns.has(run.id));
+                }
+
+                const matchesStatus = statusMatches.some(match => match);
+
+                return matchesSearch && matchesStatus;
             });
 
             if (sortBy) {
@@ -438,8 +466,20 @@
             renderRuns();
         });
 
+        document.getElementById('filterNotCompleted').addEventListener('click', function() {
+            filterNotCompletedActive = !filterNotCompletedActive;
+            this.classList.toggle('active');
+            renderRuns();
+        });
+
         document.getElementById('filterSaved').addEventListener('click', function() {
             filterSavedActive = !filterSavedActive;
+            this.classList.toggle('active');
+            renderRuns();
+        });
+
+        document.getElementById('filterNotSaved').addEventListener('click', function() {
+            filterNotSavedActive = !filterNotSavedActive;
             this.classList.toggle('active');
             renderRuns();
         });

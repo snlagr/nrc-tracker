@@ -32,6 +32,13 @@
             margin-bottom: 10px;
         }
 
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
         .bulk-import-btn {
             padding: 10px 20px;
             background: #00cc66;
@@ -41,11 +48,25 @@
             font-size: 1rem;
             cursor: pointer;
             transition: all 0.2s;
-            margin-top: 10px;
         }
 
         .bulk-import-btn:hover {
             background: #00aa55;
+        }
+
+        .chatgpt-btn {
+            padding: 10px 20px;
+            background: #10a37f;
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .chatgpt-btn:hover {
+            background: #0d8c6d;
         }
 
         .filters {
@@ -428,7 +449,10 @@
     <div class="container">
         <header>
             <h1>NRC Guided Runs Tracker</h1>
-            <button class="bulk-import-btn" onclick="openBulkImport()">Bulk Import Completed Runs</button>
+            <div class="header-buttons">
+                <button class="bulk-import-btn" onclick="openBulkImport()">Bulk Import Completed Runs</button>
+                <button class="chatgpt-btn" onclick="askChatGPT()">Ask ChatGPT for Next Run</button>
+            </div>
         </header>
 
         <div class="filters">
@@ -866,6 +890,24 @@
                 closeBulkImport();
             }
         });
+
+        function askChatGPT() {
+            // Get completed run IDs (just the IDs)
+            const completedRunsList = Array.from(completedRuns).join(',');
+
+            // Get only incomplete runs with id and subtitle for recommendations
+            const incompleteRuns = allRuns
+                .filter(run => !completedRuns.has(run.id))
+                .map(run => `${run.id}:${run.landing?.subtitle || ''}`)
+                .join('|');
+
+            const prompt = `NRC Guided Runs - suggest 3-5 next runs.
+Completed: ${completedRunsList}
+Available: ${incompleteRuns}`;
+
+            const encodedPrompt = encodeURIComponent(prompt);
+            window.open(`https://chatgpt.com/?q=${encodedPrompt}`, '_blank');
+        }
 
         document.getElementById('search').addEventListener('input', renderRuns);
         document.getElementById('sortBy').addEventListener('change', renderRuns);

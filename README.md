@@ -1,6 +1,6 @@
 # NRC Guided Runs Tracker
 
-A web-based tracker for Nike Run Club guided runs, hosted on GitHub Pages.
+A web-based tracker for Nike Run Club guided runs, hosted on Vercel.
 
 ## Features
 
@@ -60,9 +60,4 @@ The script will output a list of run IDs that you can paste into the bulk import
 - Pure HTML/CSS/JavaScript
 - No build process or dependencies
 - Client-side only (except for fetching run data)
-- GitHub Pages hosting
-
-## Links
-- [Live Demo](https://snlagr.github.io/nrc-tracker/)
-- [GitHub Repository](https://github.com/snlagr/nrc-tracker)
-- [Python Script](https://github.com/snlagr/nrc-tracker/blob/main/fetch_completed_runs.py)
+- Vercel hosting

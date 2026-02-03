@@ -186,6 +186,23 @@
             object-fit: cover;
         }
 
+        .open-in-app-btn {
+            display: none;
+            padding: 8px 16px;
+            border: 1px solid #0066ff;
+            border-radius: 6px;
+            background: transparent;
+            color: #0066ff;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .open-in-app-btn:hover {
+            background: #0066ff;
+            color: #fff;
+        }
+
         .run-content {
             padding: 15px;
         }
@@ -482,6 +499,14 @@
             h1 {
                 font-size: 1.8rem;
             }
+
+            .run-image {
+                height: 120px;
+            }
+
+            .open-in-app-btn {
+                display: inline-block;
+            }
         }
     </style>
 </head>
@@ -740,6 +765,10 @@
                                         onclick="toggleSaved('${run.id}', event)">
                                     ${isSaved ? '★ Saved' : 'Save'}
                                 </button>
+                                <button class="open-in-app-btn"
+                                        onclick="openInApp('${run.id}', event)">
+                                    Open in App
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -779,6 +808,11 @@
 
         function generateRunUrl(runId) {
             return `https://nikerunclub.sng.link/A6sko/96h7?_dl=x-callback-url/audioguidedrun/details?id%3D${runId}%26source%3Dnrc-library`;
+        }
+
+        function openInApp(runId, event) {
+            event.stopPropagation();
+            window.location.href = generateRunUrl(runId);
         }
 
         function showRunInfo(runId, event) {

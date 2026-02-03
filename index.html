@@ -32,6 +32,22 @@
             margin-bottom: 10px;
         }
 
+        .bulk-import-btn {
+            padding: 10px 20px;
+            background: #00cc66;
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+
+        .bulk-import-btn:hover {
+            background: #00aa55;
+        }
+
         .filters {
             display: flex;
             flex-wrap: wrap;
@@ -299,6 +315,96 @@
             transform: rotate(90deg);
         }
 
+        .bulk-import-modal textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            background: #2a2a2a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #fff;
+            font-family: monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+            margin-bottom: 15px;
+        }
+
+        .bulk-import-modal textarea:focus {
+            outline: none;
+            border-color: #0066ff;
+        }
+
+        .bulk-import-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .bulk-import-actions button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .bulk-import-actions .import-btn {
+            background: #0066ff;
+            color: #fff;
+        }
+
+        .bulk-import-actions .import-btn:hover {
+            background: #0052cc;
+        }
+
+        .bulk-import-actions .cancel-btn {
+            background: #2a2a2a;
+            color: #fff;
+        }
+
+        .bulk-import-actions .cancel-btn:hover {
+            background: #333;
+        }
+
+        .bulk-result {
+            padding: 15px;
+            background: #2a2a2a;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .bulk-result.success {
+            background: rgba(0, 204, 102, 0.2);
+            border: 1px solid #00cc66;
+        }
+
+        .bulk-result.error {
+            background: rgba(255, 68, 68, 0.2);
+            border: 1px solid #ff4444;
+        }
+
+        .bulk-import-help {
+            padding: 15px;
+            background: rgba(0, 102, 255, 0.1);
+            border: 1px solid #0066ff;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .bulk-import-help a {
+            color: #0066ff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .bulk-import-help a:hover {
+            text-decoration: underline;
+        }
+
         @media (max-width: 768px) {
             .runs-grid {
                 grid-template-columns: 1fr;
@@ -322,11 +428,12 @@
     <div class="container">
         <header>
             <h1>NRC Guided Runs Tracker</h1>
+            <button class="bulk-import-btn" onclick="openBulkImport()">Bulk Import Completed Runs</button>
         </header>
 
         <div class="filters">
             <div class="filter-group">
-                <label for="search">Search by name</label>
+                <label for="search">Search by name or ID</label>
                 <input type="text" id="search" placeholder="Search runs...">
             </div>
 
@@ -369,6 +476,27 @@
             <div class="modal-header" id="modalHeader"></div>
             <button class="open-app-btn" id="openAppBtn">Open in Nike Run Club App</button>
             <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="bulkImportModal">
+        <div class="modal-content bulk-import-modal">
+            <button class="modal-close" onclick="closeBulkImport()">&times;</button>
+            <div class="modal-header">
+                <h2>Bulk Import Completed Runs</h2>
+                <div class="subtitle">Paste run IDs (one per line)</div>
+            </div>
+            <div class="modal-body">
+                <div class="bulk-import-help">
+                    💡 <strong>Tip:</strong> Run <a href="https://github.com/snlagr/nrc-tracker/blob/main/fetch_completed_runs.py" target="_blank">this Python script</a> to automatically fetch your completed run IDs from Nike's API, then paste the output here.
+                </div>
+                <div id="bulkResult"></div>
+                <textarea id="bulkImportText" placeholder="1000_SECOND_RUN&#10;BELIEVE_IN_THE_RUN&#10;BACK_TO_BASICS"></textarea>
+                <div class="bulk-import-actions">
+                    <button class="cancel-btn" onclick="closeBulkImport()">Cancel</button>
+                    <button class="import-btn" onclick="processBulkImport()">Import</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -439,7 +567,8 @@
 
             let filtered = allRuns.filter(run => {
                 const title = run.landing?.title?.toLowerCase() || '';
-                const matchesSearch = title.includes(search);
+                const runId = run.id?.toLowerCase() || '';
+                const matchesSearch = title.includes(search) || runId.includes(search);
 
                 // Hide distance-based runs if sorting by time
                 if (sortBy.includes('time')) {
@@ -655,9 +784,86 @@
             document.getElementById('infoModal').classList.remove('active');
         }
 
+        function openBulkImport() {
+            document.getElementById('bulkImportModal').classList.add('active');
+            document.getElementById('bulkImportText').value = '';
+            document.getElementById('bulkResult').innerHTML = '';
+        }
+
+        function closeBulkImport() {
+            document.getElementById('bulkImportModal').classList.remove('active');
+        }
+
+        function processBulkImport() {
+            const text = document.getElementById('bulkImportText').value;
+            const resultDiv = document.getElementById('bulkResult');
+
+            const runIds = text
+                .split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0);
+
+            if (runIds.length === 0) {
+                resultDiv.innerHTML = '<div class="bulk-result error">Please enter at least one run ID</div>';
+                return;
+            }
+
+            let imported = 0;
+            let notFound = [];
+
+            runIds.forEach(runId => {
+                // First try to find by direct ID match
+                let run = allRuns.find(r => r.id === runId);
+
+                // If not found, try to find by previousId
+                if (!run) {
+                    run = allRuns.find(r => r.properties?.previousId === runId);
+                }
+
+                // If not found, try to find in previousIds array
+                if (!run) {
+                    run = allRuns.find(r =>
+                        r.properties?.previousIds &&
+                        Array.isArray(r.properties.previousIds) &&
+                        r.properties.previousIds.includes(runId)
+                    );
+                }
+
+                if (run) {
+                    completedRuns.add(run.id);
+                    imported++;
+                } else {
+                    notFound.push(runId);
+                }
+            });
+
+            localStorage.setItem('completedRuns', JSON.stringify([...completedRuns]));
+            renderRuns();
+
+            let resultHTML = `<div class="bulk-result success">Successfully marked ${imported} run(s) as completed</div>`;
+
+            if (notFound.length > 0) {
+                resultHTML += `<div class="bulk-result error">Not found: ${notFound.join(', ')}</div>`;
+            }
+
+            resultDiv.innerHTML = resultHTML;
+
+            if (notFound.length === 0) {
+                setTimeout(() => {
+                    closeBulkImport();
+                }, 1500);
+            }
+        }
+
         document.getElementById('infoModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeModal();
+            }
+        });
+
+        document.getElementById('bulkImportModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeBulkImport();
             }
         });
 

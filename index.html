@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NRC Guided Runs Tracker</title>
+    <title>NRC Tracker</title>
+    <link rel="icon" type="image/png" href="icon.png">
     <style>
         * {
             margin: 0;
@@ -117,6 +118,7 @@
             color: #fff;
             font-size: 1rem;
             min-width: 200px;
+            width: 100%;
         }
 
         input[type="text"]:focus,
@@ -129,6 +131,7 @@
         .toggle-buttons {
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
 
         .toggle-btn {
@@ -452,6 +455,22 @@
                 flex-direction: column;
             }
 
+            .filter-group {
+                width: 100%;
+            }
+
+            input[type="text"],
+            input[type="number"],
+            select {
+                min-width: unset;
+                width: 100%;
+            }
+
+            .toggle-btn {
+                flex: 1;
+                min-width: 120px;
+            }
+
             .modal-content {
                 max-height: 95vh;
             }
@@ -459,16 +478,20 @@
             .modal-header h2 {
                 font-size: 1.5rem;
             }
+
+            h1 {
+                font-size: 1.8rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>NRC Guided Runs Tracker</h1>
+            <h1>NRC Tracker</h1>
             <div class="header-buttons">
-                <button class="bulk-import-btn" onclick="openBulkImport()">Bulk Import Completed Runs</button>
-                <button class="chatgpt-btn" onclick="askChatGPT()">Ask ChatGPT for Next Run</button>
+                <button class="bulk-import-btn" onclick="openBulkImport()">Bulk Import</button>
+                <button class="chatgpt-btn" onclick="askChatGPT()">Ask ChatGPT</button>
             </div>
             <div class="social-links">
                 <a href="https://github.com/snlagr/nrc-tracker" target="_blank">GitHub</a>

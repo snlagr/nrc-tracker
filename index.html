@@ -69,6 +69,23 @@
             background: #0d8c6d;
         }
 
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .social-links a {
+            color: #999;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .social-links a:hover {
+            color: #0066ff;
+        }
+
         .filters {
             display: flex;
             flex-wrap: wrap;
@@ -452,6 +469,11 @@
             <div class="header-buttons">
                 <button class="bulk-import-btn" onclick="openBulkImport()">Bulk Import Completed Runs</button>
                 <button class="chatgpt-btn" onclick="askChatGPT()">Ask ChatGPT for Next Run</button>
+            </div>
+            <div class="social-links">
+                <a href="https://github.com/snlagr/nrc-tracker" target="_blank">GitHub</a>
+                <span>•</span>
+                <a href="https://www.linkedin.com/in/snlagr/" target="_blank">LinkedIn</a>
             </div>
         </header>
 
